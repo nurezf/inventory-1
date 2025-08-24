@@ -31,19 +31,18 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "name",
     header: "Name",
-    cell: ({ row }) => (
-        const Icon = row.original.icon;
-        const name=row.orginal.name;
-        return (
-      <div className="flex items-center space-x-2">
-        <div className="p-2 rounded-sm bg-primary/10">
-        {Icon && <Icon className="text-lg" />}
+    cell: ({ row }) => {
+      const Icon = row.original.icon;
+      const name = row.original.name;
+      return (
+        <div className="flex items-center space-x-2">
+          <div className="p-2 rounded-sm bg-primary/10">
+            <Icon className="text-lg" />
+          </div>
+          <span>{name}</span>
         </div>
-        <span>{name}</span>
-        
-      </div>
-        )
-    ),
+      );
+    },
   },
   {
     accessorKey: "supplier",
@@ -57,35 +56,34 @@ export const columns: ColumnDef<Product>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.orginal.status;
-      let colorClass;
+      const status = row.original.status;
+      let colorClass: string;
       let icon: ReactNode;
 
-    swith(status){
+      switch (status) {
         case "published":
-            colorClass="text-green-600 bg-green-100"
-            icon=<FaCheck className="text-[12px]"/>
-            break
+          colorClass = "text-green-600 bg-green-100";
+          icon = <FaCheck className="text-[12px]" />;
+          break;
         case "inactive":
-            colorClass="bg-red-100 text-red-600"
-            icon=<IoClose />
-            break
+          colorClass = "bg-red-100 text-red-600";
+          icon = <IoClose />;
+          break;
         case "draft":
-            colorClass="tet-grey-600 bg-grey-200"
-            icon=<FaInbox />
-            break
+          colorClass = "text-gray-600 bg-gray-200";
+          icon = <FaInbox />;
+          break;
         default:
-            colorClass="tet-grey-600 bg-grey-200"
-            icon=<FaInbox />
-
-    }
+          colorClass = "text-gray-600 bg-gray-200";
+          icon = <FaInbox />;
+      }
 
       return (
         <span
           className={`px-3 py-[2px] rounded-full ${colorClass} font-medium flex gap-1 items-center w-fit`}
         >
-         {icon}
-         <span className="text-[13px]">{status}</span>
+          {icon}
+          <span className="text-[13px]">{status}</span>
         </span>
       );
     },
