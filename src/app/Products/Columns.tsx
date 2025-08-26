@@ -6,6 +6,7 @@ import { IconType } from "react-icons";
 import { IoClose } from "react-icons/io5";
 import { FaCheck } from "react-icons/fa";
 import { FaInbox } from "react-icons/fa";
+import ProductDropDown from "./ProductDropDown";
 
 export type Product = {
   id: string;
@@ -100,5 +101,11 @@ export const columns: ColumnDef<Product>[] = [
     accessorKey: "price",
     header: "Price",
     cell: ({ row }) => `$${row.getValue("price").toFixed(2)}`,
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      return <ProductDropDown row={row} />;
+    },
   },
 ];
