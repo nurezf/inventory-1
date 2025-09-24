@@ -12,6 +12,7 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -33,10 +34,20 @@ export default function ProductTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const [pagination , setPagination]=useState<PaginationType>({
+    pageIndex:0;
+    pagesize:0;
+  });
+
   const table = useReactTable({
     data,
     columns,
+    state:{
+      pagination,
+    },
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   return (
@@ -103,6 +114,12 @@ export default function ProductTable<TData, TValue>({
           </Table>
         </div>
       </div>
+    </div>
+    <div className="flex items-center justify-between mt-5">
+      <PaginationSelection
+      pagination={pagination}
+      setPagination={setPagination}/>
+      
     </div>
   );
 }
