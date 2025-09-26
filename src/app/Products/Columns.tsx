@@ -4,9 +4,17 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ReactNode } from "react";
 import { IconType } from "react-icons";
 import { IoClose } from "react-icons/io5";
-import { FaCheck } from "react-icons/fa";
-import { FaInbox } from "react-icons/fa";
+import { FaCheck, FaInbox } from "react-icons/fa";
 import ProductDropDown from "./ProductDropDown";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 export type Product = {
   id: string;
@@ -31,7 +39,6 @@ export type Product = {
 export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: "Name",
     cell: ({ row }) => {
       const Icon = row.original.icon;
       const name = row.original.name;
@@ -43,6 +50,38 @@ export const columns: ColumnDef<Product>[] = [
           <span>{name}</span>
         </div>
       );
+    },
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted();
+      const SortingIcon = isSorted
+        ? isSorted === "asc"
+          ? " 🔼"
+          : " 🔽"
+        : " ↕️";
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 px-2">
+              Name {SortingIcon}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" side="bottom">
+            <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
+              Asc
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
+              Desc
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+    sortingFn: (rowA, rowB, columnId) => {
+      // Case-insensitive sorting for the name column
+      const a = rowA.getValue(columnId) as string;
+      const b = rowB.getValue(columnId) as string;
+      return a.localeCompare(b, undefined, { sensitivity: "base" });
     },
   },
   {

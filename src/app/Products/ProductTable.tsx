@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react"; // Added missing import
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { IoClose } from "react-icons/io5";
@@ -13,7 +13,9 @@ import {
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
+  getSortedRowModel, // Added for sorting
   useReactTable,
+  SortingState, // Added for sorting state
 } from "@tanstack/react-table";
 import {
   Table,
@@ -31,10 +33,9 @@ interface DataTableProps<TData, TValue> {
 
 export interface PaginationType {
   pageIndex: number;
-  pageSize: number; // Fixed typo from 'pagesize' to 'pageSize'
+  pageSize: number;
 }
 
-// PaginationSelection Component
 function PaginationSelection({
   pagination,
   setPagination,
@@ -66,24 +67,57 @@ function PaginationSelection({
   );
 }
 
+function FilterArea() {
+  return (
+    <div className="flex gap-2">
+      <div className="flex border-dashed border rounded-sm p-1 gap-2 items-center px-2 text-sm">
+        <span className="text-gray-600">Status</span>
+        <Separator orientation="vertical" />
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary">Published</Badge>
+          <Badge variant="secondary">Inactive</Badge>
+          <Badge variant="secondary">Draft</Badge>
+        </div>
+      </div>
+      <div className="flex border-dashed border rounded-sm p-1 gap-2 items-center px-2 text-sm">
+        <span className="text-gray-600">Category</span>
+        <Separator orientation="vertical" />
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary">Electronics</Badge>
+          <Badge variant="secondary">Clothing</Badge>
+          <Badge variant="secondary">Books</Badge>
+        </div>
+      </div>
+      <Button variant="ghost" className="p-1 px-2">
+        <span>Reset</span>
+        <IoClose className="text-lg" />
+      </Button>
+    </div>
+  );
+}
+
 export default function ProductTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
   const [pagination, setPagination] = useState<PaginationType>({
     pageIndex: 0,
-    pageSize: 10, // Set reasonable default
+    pageSize: 10,
   });
+  const [sorting, setSorting] = useState<SortingState>([]); // Added for sorting state
 
   const table = useReactTable({
     data,
     columns,
     state: {
       pagination,
+      sorting, // Added to table state
     },
     onPaginationChange: setPagination,
+    onSortingChange: setSorting, // Added for sorting
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(), // Added for sorting
   });
 
   return (
@@ -194,35 +228,6 @@ export default function ProductTable<TData, TValue>({
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function FilterArea() {
-  return (
-    <div className="flex gap-2">
-      <div className="flex border-dashed border rounded-sm p-1 gap-2 items-center px-2 text-sm">
-        <span className="text-gray-600">Status</span>
-        <Separator orientation="vertical" />
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary">Published</Badge>
-          <Badge variant="secondary">Inactive</Badge>
-          <Badge variant="secondary">Draft</Badge>
-        </div>
-      </div>
-      <div className="flex border-dashed border rounded-sm p-1 gap-2 items-center px-2 text-sm">
-        <span className="text-gray-600">Category</span>
-        <Separator orientation="vertical" />
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary">Electronics</Badge>
-          <Badge variant="secondary">Clothing</Badge>
-          <Badge variant="secondary">Books</Badge>
-        </div>
-      </div>
-      <Button variant="ghost" className="p-1 px-2">
-        <span>Reset</span>
-        <IoClose className="text-lg" />
-      </Button>
     </div>
   );
 }
