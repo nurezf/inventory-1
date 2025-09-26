@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react"; // Added missing import
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { IoClose } from "react-icons/io5";
@@ -7,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusDropDown } from "../AppTable/dropdowns/StatusDropDown";
 import { CategoriesDropDown } from "../AppTable/dropdowns/CategoryDropDown";
-
 import {
   ColumnDef,
   flexRender,
@@ -15,7 +15,6 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -30,19 +29,56 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
 }
 
+export interface PaginationType {
+  pageIndex: number;
+  pageSize: number; // Fixed typo from 'pagesize' to 'pageSize'
+}
+
+// PaginationSelection Component
+function PaginationSelection({
+  pagination,
+  setPagination,
+  table,
+}: {
+  pagination: PaginationType;
+  setPagination: React.Dispatch<React.SetStateAction<PaginationType>>;
+  table: ReturnType<typeof useReactTable>;
+}) {
+  return (
+    <div className="flex items-center gap-4">
+      <select
+        value={pagination.pageSize}
+        onChange={(e) =>
+          setPagination((prev) => ({
+            ...prev,
+            pageSize: Number(e.target.value),
+          }))
+        }
+        className="h-8 rounded-md border px-2 text-sm"
+      >
+        {[10, 20, 30, 40, 50].map((size) => (
+          <option key={size} value={size}>
+            Show {size}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 export default function ProductTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [pagination , setPagination]=useState<PaginationType>({
-    pageIndex:0;
-    pagesize:0;
+  const [pagination, setPagination] = useState<PaginationType>({
+    pageIndex: 0,
+    pageSize: 10, // Set reasonable default
   });
 
   const table = useReactTable({
     data,
     columns,
-    state:{
+    state: {
       pagination,
     },
     onPaginationChange: setPagination,
@@ -68,18 +104,16 @@ export default function ProductTable<TData, TValue>({
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    );
-                  })}
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  ))}
                 </TableRow>
               ))}
             </TableHeader>
@@ -114,12 +148,52 @@ export default function ProductTable<TData, TValue>({
           </Table>
         </div>
       </div>
-    </div>
-    <div className="flex items-center justify-between mt-5">
-      <PaginationSelection
-      pagination={pagination}
-      setPagination={setPagination}/>
-      
+      <div className="flex items-center justify-between mt-5">
+        <PaginationSelection
+          pagination={pagination}
+          setPagination={setPagination}
+          table={table}
+        />
+        <div className="flex gap-6 items-center">
+          <span className="text-sm text-gray-500">
+            Page {pagination.pageIndex + 1} of {table.getPageCount()}
+          </span>
+          <div className="flex items-center justify-end space-x-2 py-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            >
+              {"<<"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              {"<"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              {">"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            >
+              {">>"}
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -127,7 +201,6 @@ export default function ProductTable<TData, TValue>({
 function FilterArea() {
   return (
     <div className="flex gap-2">
-      {/* Status */}
       <div className="flex border-dashed border rounded-sm p-1 gap-2 items-center px-2 text-sm">
         <span className="text-gray-600">Status</span>
         <Separator orientation="vertical" />
@@ -137,7 +210,6 @@ function FilterArea() {
           <Badge variant="secondary">Draft</Badge>
         </div>
       </div>
-      {/* Category */}
       <div className="flex border-dashed border rounded-sm p-1 gap-2 items-center px-2 text-sm">
         <span className="text-gray-600">Category</span>
         <Separator orientation="vertical" />
