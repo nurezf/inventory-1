@@ -28,6 +28,11 @@ type status = {
   icon: React.ReactNode;
 };
 
+type StatusDropDownProps = {
+  selectedStatuses: string[];
+  setSelectedStatuses: React.Dispatch<React.SetStateAction<string[]>>;
+};
+
 const statuses: status[] = [
   {
     value: "published",
@@ -46,8 +51,21 @@ const statuses: status[] = [
   },
 ];
 
-export function StatusDropDown() {
+export function StatusDropDown({
+  selectedStatuses,
+  setSelectedStatuses,
+}: StatusDropDownProps) {
   const [open, setOpen] = React.useState(false);
+
+  function handleCheckboxChange(value: string) {
+    setSelectedStatuses((prevSelected) => {
+      const updateStatuses = prevSelected.includes(value)
+        ? prevSelected.filter((status) => status !== value)
+        : [...prevSelected, value];
+      console.log("Updated Statuses:", updateStatuses);
+      return updateStatuses;
+    });
+  }
 
   function returnColor(status: string) {
     switch (status) {
@@ -88,8 +106,13 @@ export function StatusDropDown() {
                     className={`flex items-center gap-2 ${returnColor(
                       status.value
                     )}`}
+                    onClick={() => handleCheckboxChange(status.value)}
                   >
-                    <Checkbox className="mr-2" />
+                    <Checkbox
+                      className="mr-2"
+                      checked={selectedStatuses.includes(status.value)}
+                      onCheckedChange={() => handleCheckboxChange(status.value)}
+                    />
                     {status.icon}
                     {status.label}
                     <FaCheck className="ml-auto" />

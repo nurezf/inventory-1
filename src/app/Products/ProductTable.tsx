@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { IoClose } from "react-icons/io5";
@@ -18,6 +18,7 @@ import {
   getSortedRowModel, // Added for sorting
   useReactTable,
   SortingState, // Added for sorting state
+  FilterFn,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -37,6 +38,18 @@ export interface PaginationType {
   pageIndex: number;
   pageSize: number;
 }
+
+const multiSelectFilter: FilterFn<unknown> = (
+  row,
+  columnId,
+  filterValue: string[]
+) => {
+  const rowValue = (row.getValue(columnId) as string).toLowerCase();
+  const lowercaseFilterValues = filterValue.map((val) => val.toLowerCase());
+  return filterValue.length === 0 || lowercaseFilterValues.includes(rowValue);
+};
+
+console.log("multiSelectFilter", multiSelectFilter);
 
 function PaginationSelection({
   pagination,
@@ -109,6 +122,26 @@ export default function ProductTable<TData, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]); // Added for sorting state
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+
+  useEffect(() => {
+    console.log("Selected Statuses:", selectedStatuses);
+
+    setColumnFilters((prev) => {
+      const filterWithoutStatus = prev.filter(
+        (filter) => filter.id !== "status"
+      );
+
+      const newFilters = selectedStatuses.length
+        ? [...filterWithoutStatus, { id: "status", value: selectedStatuses }]
+        : filterWithoutStatus;
+
+      console.log("new Column Filters:", newFilters);
+
+      return newFilters;
+    });
+  }, [selectedStatuses]);
+
   const table = useReactTable({
     data,
     columns,
@@ -116,6 +149,9 @@ export default function ProductTable<TData, TValue>({
       pagination,
       sorting, // Added to table state
       columnFilters,
+    },
+    filterFns: {
+      multiSelect: multiSelectFilter,
     },
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
@@ -139,7 +175,10 @@ export default function ProductTable<TData, TValue>({
             }
           />
           <div className="flex items-center gap-4">
-            <StatusDropDown />
+            <StatusDropDown
+              selectedStatuses={selectedStatuses}
+              setSelectedStatuses={setSelectedStatuses}
+            />
             <CategoriesDropDown />
           </div>
         </div>
