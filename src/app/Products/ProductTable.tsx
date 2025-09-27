@@ -15,9 +15,9 @@ import {
   ColumnFiltersState,
   getFilteredRowModel,
   getPaginationRowModel,
-  getSortedRowModel, // Added for sorting
+  getSortedRowModel,
   useReactTable,
-  SortingState, // Added for sorting state
+  SortingState,
   FilterFn,
 } from "@tanstack/react-table";
 import {
@@ -48,8 +48,6 @@ const multiSelectFilter: FilterFn<unknown> = (
   const lowercaseFilterValues = filterValue.map((val) => val.toLowerCase());
   return filterValue.length === 0 || lowercaseFilterValues.includes(rowValue);
 };
-
-console.log("multiSelectFilter", multiSelectFilter);
 
 function PaginationSelection({
   pagination,
@@ -82,31 +80,66 @@ function PaginationSelection({
   );
 }
 
-function FilterArea() {
+function FilterArea({
+  selectedStatuses,
+  selectedCategories,
+  setSelectedStatuses,
+  setSelectedCategories,
+}: {
+  selectedStatuses: string[];
+  selectedCategories: string[];
+  setSelectedStatuses: React.Dispatch<React.SetStateAction<string[]>>;
+  setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>;
+}) {
   return (
     <div className="flex gap-2">
-      <div className="flex border-dashed border rounded-sm p-1 gap-2 items-center px-2 text-sm">
-        <span className="text-gray-600">Status</span>
-        <Separator orientation="vertical" />
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary">Published</Badge>
-          <Badge variant="secondary">Inactive</Badge>
-          <Badge variant="secondary">Draft</Badge>
+      {selectedStatuses.length > 0 && (
+        <div className="flex border-dashed border rounded-sm p-1 gap-2 items-center px-2 text-sm">
+          <span className="text-gray-600">Status</span>
+          <Separator orientation="vertical" />
+          <div className="flex items-center gap-2">
+            {selectedStatuses.length < 3 ? (
+              selectedStatuses.map((status) => (
+                <Badge key={status} variant="secondary">
+                  {status}
+                </Badge>
+              ))
+            ) : (
+              <Badge variant="secondary">Selected</Badge>
+            )}
+          </div>
         </div>
-      </div>
-      <div className="flex border-dashed border rounded-sm p-1 gap-2 items-center px-2 text-sm">
-        <span className="text-gray-600">Category</span>
-        <Separator orientation="vertical" />
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary">Electronics</Badge>
-          <Badge variant="secondary">Clothing</Badge>
-          <Badge variant="secondary">Books</Badge>
+      )}
+      {selectedCategories.length > 0 && (
+        <div className="flex border-dashed border rounded-sm p-1 gap-2 items-center px-2 text-sm">
+          <span className="text-gray-600">Category</span>
+          <Separator orientation="vertical" />
+          <div className="flex items-center gap-2">
+            {selectedCategories.length < 3 ? (
+              selectedCategories.map((category) => (
+                <Badge key={category} variant="secondary">
+                  {category}
+                </Badge>
+              ))
+            ) : (
+              <Badge variant="secondary">Selected</Badge>
+            )}
+          </div>
         </div>
-      </div>
-      <Button variant="ghost" className="p-1 px-2">
-        <span>Reset</span>
-        <IoClose className="text-lg" />
-      </Button>
+      )}
+      {(selectedStatuses.length > 0 || selectedCategories.length > 0) && (
+        <Button
+          variant="ghost"
+          className="p-1 px-2"
+          onClick={() => {
+            setSelectedStatuses([]);
+            setSelectedCategories([]);
+          }}
+        >
+          <span>Reset</span>
+          <IoClose className="text-lg" />
+        </Button>
+      )}
     </div>
   );
 }
@@ -119,35 +152,41 @@ export default function ProductTable<TData, TValue>({
     pageIndex: 0,
     pageSize: 10,
   });
-  const [sorting, setSorting] = useState<SortingState>([]); // Added for sorting state
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   useEffect(() => {
-    console.log("Selected Statuses:", selectedStatuses);
-
     setColumnFilters((prev) => {
       const filterWithoutStatus = prev.filter(
-        (filter) => filter.id !== "status"
+        (filter) => filter.id !== "status" && filter.id !== "category"
       );
 
-      const newFilters = selectedStatuses.length
-        ? [...filterWithoutStatus, { id: "status", value: selectedStatuses }]
-        : filterWithoutStatus;
+      const newFilters = [...filterWithoutStatus];
 
-      console.log("new Column Filters:", newFilters);
-
+      if (selectedStatuses.length > 0) {
+        newFilters.push({
+          id: "status",
+          value: selectedStatuses,
+        });
+      }
+      if (selectedCategories.length > 0) {
+        newFilters.push({
+          id: "category",
+          value: selectedCategories,
+        });
+      }
       return newFilters;
     });
-  }, [selectedStatuses]);
+  }, [selectedStatuses, selectedCategories]);
 
   const table = useReactTable({
     data,
     columns,
     state: {
       pagination,
-      sorting, // Added to table state
+      sorting,
       columnFilters,
     },
     filterFns: {
@@ -156,10 +195,10 @@ export default function ProductTable<TData, TValue>({
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onPaginationChange: setPagination,
-    onSortingChange: setSorting, // Added for sorting
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(), // Added for sorting
+    getSortedRowModel: getSortedRowModel(),
   });
 
   return (
@@ -179,10 +218,18 @@ export default function ProductTable<TData, TValue>({
               selectedStatuses={selectedStatuses}
               setSelectedStatuses={setSelectedStatuses}
             />
-            <CategoriesDropDown />
+            <CategoriesDropDown
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
+            />
           </div>
         </div>
-        <FilterArea />
+        <FilterArea
+          selectedStatuses={selectedStatuses}
+          setSelectedStatuses={setSelectedStatuses}
+          selectedCategories={selectedCategories}
+          setSelectedCategories={setSelectedCategories}
+        />
       </div>
       <div>
         <div className="overflow-hidden rounded-md border">

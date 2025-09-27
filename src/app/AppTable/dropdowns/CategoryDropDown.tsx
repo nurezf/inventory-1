@@ -25,6 +25,11 @@ type Category = {
   label: string;
 };
 
+type CategoriesDropDownProps = {
+  selectedCategories: string[];
+  setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>;
+};
+
 const categories: Category[] = [
   {
     value: "electronics",
@@ -68,8 +73,25 @@ const categories: Category[] = [
   },
 ];
 
-export function CategoriesDropDown() {
+export function CategoriesDropDown({
+  selectedCategories,
+  setSelectedCategories,
+}: CategoriesDropDownProps) {
   const [open, setOpen] = React.useState(false);
+
+  function handleCheckboxChange(value: string) {
+    setSelectedCategories((prevSelected) => {
+      const updatedCategories = prevSelected.includes(value)
+        ? prevSelected.filter((category) => category !== value)
+        : [...prevSelected, value];
+      console.log("Updated Categories:", updatedCategories);
+      return updatedCategories;
+    });
+  }
+
+  function clearFilter() {
+    setSelectedCategories([]);
+  }
 
   return (
     <div className="flex items-center space-x-4 poppins">
@@ -100,7 +122,11 @@ export function CategoriesDropDown() {
                     value={category.value}
                     className="flex items-center gap-2"
                   >
-                    <Checkbox />
+                    <Checkbox
+                      checked={selectedCategories.includes(category.value)}
+                      onClick={() => handleCheckboxChange(category.value)}
+                      className="size-4 rounded-[4px]"
+                    />
                     {category.label}
                   </CommandItem>
                 ))}

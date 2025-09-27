@@ -93,6 +93,7 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "status",
     header: ({ column }) => <SortableHeader column={column} title=" status" />,
+    filterFn: "multiSelect",
     cell: ({ row }) => {
       const status = row.original.status;
       let colorClass: string;
@@ -131,6 +132,7 @@ export const columns: ColumnDef<Product>[] = [
     header: ({ column }) => (
       <SortableHeader column={column} title=" cateorgy" />
     ),
+    filterFn: "multiSelect",
   },
   {
     accessorKey: "quantityInStock",
