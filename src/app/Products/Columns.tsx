@@ -36,6 +36,33 @@ export type Product = {
   icon: IconType;
 };
 
+const SortableHeader: React.FC<SortableHeaderProps> = ({ column, title }) => {
+  const isSorted = column.getIsSorted();
+  const SortingIcon = isSorted ? (isSorted === "asc" ? " 🔼" : " 🔽") : " ↕️";
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="h-8 px-2"
+          aria-label={`Sort by ${title}`}
+        >
+          {title} {SortingIcon}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" side="bottom">
+        <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
+          Asc
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
+          Desc
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
 export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "name",
@@ -51,50 +78,21 @@ export const columns: ColumnDef<Product>[] = [
         </div>
       );
     },
-    header: ({ column }) => {
-      const isSorted = column.getIsSorted();
-      const SortingIcon = isSorted
-        ? isSorted === "asc"
-          ? " 🔼"
-          : " 🔽"
-        : " ↕️";
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 px-2">
-              Name {SortingIcon}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" side="bottom">
-            <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
-              Asc
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
-              Desc
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-    sortingFn: (rowA, rowB, columnId) => {
-      // Case-insensitive sorting for the name column
-      const a = rowA.getValue(columnId) as string;
-      const b = rowB.getValue(columnId) as string;
-      return a.localeCompare(b, undefined, { sensitivity: "base" });
-    },
+    header: ({ column }) => <SortableHeader column={column} title=" Name" />,
   },
   {
     accessorKey: "supplier",
-    header: "Supplier",
+    header: ({ column }) => (
+      <SortableHeader column={column} title=" supplier" />
+    ),
   },
   {
     accessorKey: "sku",
-    header: "SKU",
+    header: ({ column }) => <SortableHeader column={column} title=" sku" />,
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: ({ column }) => <SortableHeader column={column} title=" status" />,
     cell: ({ row }) => {
       const status = row.original.status;
       let colorClass: string;
@@ -130,15 +128,19 @@ export const columns: ColumnDef<Product>[] = [
   },
   {
     accessorKey: "category",
-    header: "Category",
+    header: ({ column }) => (
+      <SortableHeader column={column} title=" cateorgy" />
+    ),
   },
   {
     accessorKey: "quantityInStock",
-    header: "Quantity in Stock",
+    header: ({ column }) => (
+      <SortableHeader column={column} title=" quantity" />
+    ),
   },
   {
     accessorKey: "price",
-    header: "Price",
+    header: ({ column }) => <SortableHeader column={column} title=" price" />,
     cell: ({ row }) => `$${row.getValue("price").toFixed(2)}`,
   },
   {
