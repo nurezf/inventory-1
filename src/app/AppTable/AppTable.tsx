@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ProductTable from "../Products/ProductTable";
 import { products } from "../Products/productData";
 import { columns } from "../Products/Columns";
+import ProductDialog from "./ProductDialog/ProductDialog";
 
 export default function AppTable() {
   return (
@@ -14,7 +15,7 @@ export default function AppTable() {
             <p className="text-sm text-slate-600">34 products</p>
           </div>
         </div>
-        <Button>Add Item</Button>
+        <ProductDialog />
       </CardHeader>
       <CardContent>
         <ProductTable data={products} columns={columns} />
