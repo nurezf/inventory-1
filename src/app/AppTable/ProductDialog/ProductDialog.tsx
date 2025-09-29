@@ -134,7 +134,15 @@ export default function ProductDialog() {
         </DialogHeader>
         <Separator />
         <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(() => {})}>
+          <form
+            onSubmit={methods.handleSubmit(() => {
+              console.log(
+                // log the vcalues of the form
+
+                methods.getValues()
+              );
+            })}
+          >
             <div className="flex flex-col gap-2 mt-1">
               <div className="grid grid-cols-2 gap-7">
                 <ProductName onSelectedIcon={onSelectedIcon} />
@@ -143,15 +151,15 @@ export default function ProductDialog() {
 
               <div className="grid grid-cols-2 gap-5 items-start mt-4">
                 <Supplier />
-                <ProductCategory
-                  selectedCategory={selectedCategory}
-                  setSelectedCategory={setSelectedCategory}
-                />
-              </div>
-              <div className="mt-3 grid grid-cols-3 gap-7 max-lg:grid-cols-2 max-lg:gap-1 max-sm:grid-cols-1">
                 <Status
                   selectedTab={selectedTab}
                   setSelectedTab={setSelectedTab}
+                />
+              </div>
+              <div className="mt-3 grid grid-cols-3 gap-7 max-lg:grid-cols-2 max-lg:gap-1 max-sm:grid-cols-1">
+                <ProductCategory
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
                 />
                 <Quantity />
                 <Price />
