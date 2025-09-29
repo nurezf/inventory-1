@@ -7,16 +7,6 @@ interface ProductState {
   setAllProducts: (allProducts: Product[]) => void;
   loadProducts: () => void;
 }
-export const useProductStore = create<ProductState>((set) => ({
-  allProducts: [],
-  setAllProducts: (allProducts) => {
-    set({ allProducts: allProducts });
-  },
-  loadProducts: async () => {
-    const fetchProducts = await fetchProducts();
-    set({ allProducts: products });
-  },
-}));
 
 function fetchProducts(): Promise<Product[]> {
   return new Promise((resolve) => {
@@ -25,3 +15,15 @@ function fetchProducts(): Promise<Product[]> {
     }, 1000);
   });
 }
+
+export const useProductStore = create<ProductState>((set) => ({
+  allProducts: [],
+  setAllProducts: (allProducts) => {
+    set({ allProducts: allProducts });
+  },
+  loadProducts: async () => {
+    const fetchedProducts = await fetchProducts();
+    console.log(fetchedProducts);
+    set({ allProducts: fetchedProducts });
+  },
+}));
